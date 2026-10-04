@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BEAMS360 at BSS Malaysia — Implementation Status &amp; Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650;7..72,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --ink:#16233B; --muted:#5E6A7E; --line:#E1E6EE;
+  --brand:#13294B; --brand-2:#1E3C6B; --on-brand:#FFFFFF; --on-brand-muted:#B9C6DC;
+  --live:#1F8A5B; --live-soft:#E1F3EA; --live-ink:#176846;
+  --ext:#3C6FB6; --ext-soft:#E4ECF8; --ext-ink:#264F8A;
+  --none:#E9EDF2; --none-ink:#8792A4;
+  --plan:#6A4FB8; --plan-soft:#EEEAFA; --plan-ink:#4B3693;
+  --radius:14px; --radius-sm:8px;
+  --shadow:0 1px 2px rgba(19,41,75,.06),0 6px 20px rgba(19,41,75,.06);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1520; --surface:#18212F; --ink:#E6ECF5; --muted:#9AA6B8; --line:#2A3546;
+    --brand:#0B1A31; --brand-2:#16305A; --on-brand-muted:#93A6C6;
+    --live:#3FB37C; --live-soft:#173527; --live-ink:#8FDAB5;
+    --ext:#6F9BDB; --ext-soft:#1C2C47; --ext-ink:#B3CBEF;
+    --none:#222C3A; --none-ink:#6E7A8C;
+    --plan:#9D86E6; --plan-soft:#2A2448; --plan-ink:#CFC2F5;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1520; --surface:#18212F; --ink:#E6ECF5; --muted:#9AA6B8; --line:#2A3546;
+  --brand:#0B1A31; --brand-2:#16305A; --on-brand-muted:#93A6C6;
+  --live:#3FB37C; --live-soft:#173527; --live-ink:#8FDAB5;
+  --ext:#6F9BDB; --ext-soft:#1C2C47; --ext-ink:#B3CBEF;
+  --none:#222C3A; --none-ink:#6E7A8C;
+  --plan:#9D86E6; --plan-soft:#2A2448; --plan-ink:#CFC2F5;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Literata",Georgia,"Times New Roman",serif;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+
+/* ---------- Hero ---------- */
+.hero{background:linear-gradient(160deg,var(--brand) 0%,var(--brand-2) 100%);color:var(--on-brand);padding:40px 0 32px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--on-brand-muted)}
+.tag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--live)}
+.hero h1{font-size:clamp(28px,4.2vw,44px);font-weight:700;line-height:1.12;margin-top:12px;max-width:34ch}
+.hero .lede{margin-top:14px;max-width:64ch;color:var(--on-brand-muted);font-size:16px}
+.hero .lede strong{color:var(--on-brand);font-weight:600}
+.meta{font-size:13px;color:var(--on-brand-muted);text-align:right;line-height:1.6}
+.meta b{color:var(--on-brand);font-weight:600}
+nav.jump{display:flex;gap:6px;flex-wrap:wrap;margin-top:26px}
+nav.jump a{font-size:13.5px;color:var(--on-brand);text-decoration:none;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.22)}
+nav.jump a:hover{background:rgba(255,255,255,.1)}
+nav.jump a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.kpi{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:18px 20px}
+.kpi b{display:block;font-family:"Literata",Georgia,serif;font-size:34px;font-weight:700;line-height:1.05}
+.kpi span{display:block;font-size:13.5px;color:var(--on-brand-muted);margin-top:6px}
+.mix{margin-top:22px}
+.mix-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.12)}
+.mix-bar i{display:block;height:100%}
+.mx-tools{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+@media (max-width:960px){.mx-tools{align-items:flex-start}}
+.mix-key{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--on-brand-muted);margin-top:10px}
+.mix-key span{display:inline-flex;align-items:center;gap:7px}
+
+/* ---------- Shared ---------- */
+main{padding:28px 0 56px}
+.section{margin-top:28px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.sec-head h2{font-size:24px;font-weight:650;line-height:1.2}
+.sec-head p{color:var(--muted);font-size:14px;margin-top:4px;max-width:90ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.pad{padding:22px 24px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.dot.l{background:var(--live)} .dot.e{background:var(--ext)} .dot.n{background:var(--none);box-shadow:inset 0 0 0 1px var(--line)} .dot.p{background:var(--plan)}
+.muted{color:var(--muted)}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;box-shadow:var(--shadow)}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--muted);padding:8px 16px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--brand);color:#fff;font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--ext);outline-offset:2px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+
+/* ---------- Segment comparison ---------- */
+.compare{padding:4px 24px}
+.seg-row{display:grid;grid-template-columns:460px 1fr;gap:28px;align-items:center;padding:18px 0;border-top:1px solid var(--line)}
+.seg-row:first-child{border-top:0}
+.seg-row h3{font-size:19px;font-weight:650}
+.seg-row .sub{font-size:13.5px;color:var(--ink);font-weight:700;margin-top:4px;line-height:1.6}
+.seg-row .pills{margin-top:0}
+.cnt-tag{font-size:12.5px;color:var(--muted);align-self:center;margin-left:4px}
+@media (max-width:960px){.seg-row{grid-template-columns:1fr;gap:12px}}
+.seg-card{display:block}
+.ring{width:118px;height:118px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .val b{font-family:"Literata",Georgia,serif;font-size:28px;font-weight:700;line-height:1}
+.ring .val small{font-size:12px;color:var(--muted);margin-top:3px}
+.seg-card h3{font-size:19px;font-weight:650}
+.seg-card .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px}
+.pill.l{background:var(--live-soft);color:var(--live-ink)}
+.pill.e{background:var(--ext-soft);color:var(--ext-ink)}
+
+/* ---------- Matrix ---------- */
+.scroller{overflow-x:auto;padding:6px 24px 8px}
+table.mx{border-collapse:separate;border-spacing:3px;width:100%;min-width:1040px;font-size:12.5px;table-layout:fixed}
+.mx col.c-school{width:150px} .mx col.c-cnt{width:44px}
+.mx th{hyphens:auto;-webkit-hyphens:auto}
+.mx th{text-align:left;font-weight:600;vertical-align:bottom}
+.mx tr.groups th{font-size:11px;color:var(--muted);font-weight:600;padding:6px 6px 6px 2px;border-bottom:2px solid var(--line)}
+.mx tr.mods th{font-size:11px;line-height:1.25;padding:8px 6px 6px 2px;color:var(--ink)}
+.mx td.school{white-space:normal;line-height:1.25;padding:0 14px 0 0;font-size:13.5px;font-weight:700;position:sticky;left:0;background:var(--surface);z-index:1}
+.mx th.school-h{position:sticky;left:0;background:var(--surface);z-index:2}
+.mx tr.brand td{padding:16px 0 4px;font-size:12.5px;font-weight:700;color:var(--brand-2)}
+:root[data-theme="dark"] .mx tr.brand td{color:var(--ext-ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mx tr.brand td{color:var(--ext-ink)}}
+.cell{height:40px;border-radius:var(--radius-sm);padding:4px 3px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-size:11.5px;font-weight:600}
+.cell.l{background:var(--live);color:#fff}
+.cell.e{background:var(--ext-soft);color:var(--ext-ink)}
+.cell.n{background:var(--none);color:var(--none-ink);font-weight:500}
+.mx td.cnt{text-align:right;padding-left:8px;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+.mx td.cnt small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.foot-note{font-size:12.5px;color:var(--muted);padding:6px 24px 20px}
+
+/* ---------- Coverage + external ---------- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card h3.t{font-size:19px;font-weight:650}
+.card p.d{font-size:13.5px;color:var(--muted);margin-top:4px}
+.sys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.stack{display:grid;gap:18px}
+.growth-row{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.growth-row .chips{margin-top:0;justify-content:flex-end}
+@media (max-width:960px){.sys{grid-template-columns:1fr}.growth-row{grid-template-columns:1fr}.growth-row .chips{justify-content:flex-start}}
+.sys-item{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px 16px;border-radius:var(--radius-sm);background:var(--ext-soft)}
+.sys-mark{width:42px;height:42px;border-radius:10px;background:var(--ext);color:#fff;display:flex;align-items:center;justify-content:center;font-family:"Literata",Georgia,serif;font-weight:700;font-size:18px}
+.sys-item b{display:block;color:var(--ext-ink);font-size:15px}
+.sys-item span{font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--none);color:var(--ink)}
+
+/* ---------- Roadmap ---------- */
+.rm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.rm-area{padding:20px;border-top:4px solid var(--plan)}
+.rm-area h3{font-size:18px;font-weight:650}
+.rm-area .n{font-size:12.5px;color:var(--muted);margin-top:2px}
+.rm-fn{margin-top:16px}
+.rm-fn > span{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.rm-sub{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:500;padding:9px 12px;border-radius:var(--radius-sm);background:var(--plan-soft);color:var(--ink);margin-bottom:6px}
+.rm-sub::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--plan);flex:none}
+.rm-note{font-size:12.5px;color:var(--muted);margin-top:4px}
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.int{padding:20px 22px;border-top:4px solid var(--plan)}
+.int h3{font-size:18px;font-weight:650}
+.int p{font-size:14px;color:var(--muted);margin-top:6px}
+.int .flow{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.node{font-size:13px;font-weight:700;padding:6px 12px;border-radius:var(--radius-sm)}
+.node.x{background:var(--ext-soft);color:var(--ext-ink)}
+.node.b{background:var(--brand);color:#fff}
+.link{flex:0 0 36px;height:2px;background:repeating-linear-gradient(90deg,var(--plan) 0 6px,transparent 6px 10px)}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.opt{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--plan-soft);color:var(--plan-ink)}
+
+.intro h1{font-size:clamp(30px,4.6vw,52px);font-weight:700;line-height:1.1;margin:0;max-width:none}
+.intro-sub{margin-top:10px;font-size:clamp(16px,1.6vw,20px);color:var(--on-brand-muted)}
+.intro-meta{display:flex;flex-wrap:wrap;margin:26px 0 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.16)}
+.intro-meta div{padding:0 28px;border-left:1px solid rgba(255,255,255,.16)}
+.intro-meta div:first-child{padding-left:0;border-left:0}
+.intro-meta dt{font-size:12.5px;color:var(--on-brand-muted)}
+.intro-meta dd{margin:2px 0 0;font-size:14.5px;font-weight:600;color:var(--on-brand)}
+@media (max-width:720px){.intro-meta{flex-direction:column;gap:12px}.intro-meta div{padding:0;border-left:0}}
+.hero-filter{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:28px;font-size:14px;color:var(--on-brand-muted)}
+.hero-filter .seg{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);box-shadow:none}
+.hero-filter .seg button{color:var(--on-brand-muted)}
+.hero-filter .seg button[aria-pressed="true"]{background:#fff;color:#13294B}
+.hero-filter + .kpis{margin-top:16px}
+.sub-h{font-size:19px;font-weight:650;margin:22px 0 12px}
+.int-grid{margin-top:0}
+.int-foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.int-foot .flow,.int-foot .opts{margin-top:0}
+.rm-grid.card{gap:0;padding:6px 0;border-top:4px solid var(--plan)}
+.rm-grid .rm-area{border-top:0;border-left:1px solid var(--line);padding:18px 22px}
+.rm-grid .rm-area:first-child{border-left:0}
+@media (max-width:960px){.rm-grid .rm-area{border-left:0;border-top:1px solid var(--line)}.rm-grid .rm-area:first-child{border-top:0}}
+footer{border-top:1px solid var(--line);margin-top:40px;padding-top:18px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:960px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .compare,.duo,.int-grid{grid-template-columns:1fr}
+  .rm-grid{grid-template-columns:1fr 1fr}
+  .meta{text-align:left}
+}
+@media (max-width:560px){
+  .rm-grid{grid-template-columns:1fr}
+  .seg-card{grid-template-columns:1fr}
+  .bar{grid-template-columns:120px 1fr 44px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .track i,.mix-bar i{transition:width .5s ease}
+  .ring circle.fg{transition:stroke-dasharray .6s ease}
+}
+@media print{
+  body{background:#fff}
+  .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card{box-shadow:none;break-inside:avoid}
+  nav.jump,.seg,.hero-filter{display:none}
+  .mx-tools{gap:0}
+  .wrap{max-width:none}
+  main{display:flex;flex-direction:column}
+  #segments{order:1} #coverage{order:2} #matrix-sec{order:3} #roadmap{order:4} footer{order:5;margin-top:14px}
+  #matrix-sec,#roadmap{break-before:page}
+  .hero{padding:26px 0 22px} .kpis{margin-top:16px} .intro-meta{margin-top:16px;padding-top:12px} .mix{margin-top:14px}
+  .sec-head{margin-bottom:8px} .pad{padding:16px 20px} .stack{gap:12px}
+  .sec-head{break-after:avoid}
+  .section{margin-top:14px}
+  main{padding-top:10px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="intro">
+      <h1>Current Status of BEAMS360 at BSS Malaysia</h1>
+      <p class="intro-sub">Implementation overview and future roadmap</p>
+      <dl class="intro-meta">
+        <div><dt>Prepared by</dt><dd>Customer Success &amp; Projects, BSS IT</dd></div>
+        <div><dt>Status as of</dt><dd>October 2026</dd></div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="segments">
+    <div class="sec-head">
+      <div><h2>Schools vs early years</h2><p>Modules live on BEAMS360 at each campus type.</p></div>
+    </div>
+    <div class="card compare" id="compare"></div>
+  </section>
+
+  <section class="section" id="matrix-sec">
+    <div class="sec-head">
+      <div><h2>Module status by campus</h2><p id="mx-sub">Every campus and module in the Malaysia tracker.</p></div>
+      <div class="mx-tools">
+    <div class="seg" role="group" aria-label="Filter campuses">
+      <button data-f="all" aria-pressed="true">All campuses</button>
+      <button data-f="k12" aria-pressed="false">Schools (3)</button>
+      <button data-f="ey" aria-pressed="false">Early years (8)</button>
+    </div>
+      <div class="legend">
+        <span><i class="dot l"></i>Live on BEAMS360</span>
+        <span><i class="dot e"></i>Another system</span>
+        <span><i class="dot n"></i>Not in use</span>
+      </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="scroller"><table class="mx" id="matrix"></table></div>
+      <p class="foot-note">Live = in production with ongoing support. Library not shown (no status recorded). Transport is on the roadmap.</p>
+    </div>
+  </section>
+
+  <section class="section" id="coverage">
+    <div class="sec-head"><div><h2>Other systems &amp; room to grow</h2></div></div>
+    <div class="stack">
+      <div class="card pad">
+        <h3 class="t">Run outside BEAMS360</h3>
+        <div class="sys" id="sys"></div>
+      </div>
+      <div class="card pad growth-row">
+        <div><h3 class="t">Room to grow at early-years campuses</h3>
+        <p class="d">Live at the schools, not yet used at the eight early-years campuses.</p></div>
+        <div class="chips" id="gaps"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="roadmap">
+    <div class="sec-head">
+      <div><h2>Future roadmap for BSS Malaysia</h2><p>Timelines to be agreed with BSS Malaysia.</p></div>
+      <div class="legend"><span><i class="dot p"></i>Planned</span><span class="muted">2 integrations, 7 modules, 9 sub-modules</span></div>
+    </div>
+
+    <h3 class="sub-h">Systems integration</h3>
+    <div class="int-grid">
+      <div class="card int">
+        <h3>BrioHR integration with BEAMS360</h3>
+        <p>HRM and Payroll at all 11 campuses, connected to BEAMS360 HR modules.</p>
+        <div class="int-foot"><div class="flow"><span class="node x">BrioHR</span><span class="link" aria-hidden="true"></span><span class="node b">BEAMS360</span></div><div class="opts"><span class="opt">Integrate</span></div></div>
+      </div>
+      <div class="card int">
+        <h3>Ecole: integrate with BEAMS360 or replace</h3>
+        <p>Fee invoices at all 11 campuses. Integrate, or replace with BEAMS360 fees.</p>
+        <div class="int-foot"><div class="flow"><span class="node x">Ecole</span><span class="link" aria-hidden="true"></span><span class="node b">BEAMS360</span></div><div class="opts"><span class="opt">Option A: Integrate</span><span class="opt">Option B: Replace</span></div></div>
+      </div>
+    </div>
+
+    <h3 class="sub-h">New Modules</h3>
+    <div class="card rm-grid">
+      <div class="rm-area">
+        <h3>Teaching &amp; learning</h3>
+        <div class="rm-fn"><span>Curriculum &amp; Lesson Plan</span><div class="rm-sub">Curriculum &amp; Lesson Plan</div></div>
+        <div class="rm-fn"><span>Daily Diary</span><div class="rm-sub">Daily Homework / Classwork</div></div>
+        <div class="rm-fn"><span>School Evaluation</span><div class="rm-sub">School Evaluation</div></div>
+      </div>
+      <div class="rm-area">
+        <h3>Finance</h3>
+        <div class="rm-fn"><span>Finance</span><div class="rm-sub">Campus Accounting</div><div class="rm-sub">Campus Budgeting</div></div>
+        <div class="rm-fn"><span>Student Management &amp; Fee Management</span><div class="rm-sub">Student Fee Challan</div></div>
+      </div>
+      <div class="rm-area">
+        <h3>Operations</h3>
+        <div class="rm-fn"><span>Inventory Management</span><div class="rm-sub">Asset Tracking</div><div class="rm-sub">Stock Management</div></div>
+        <div class="rm-fn"><span>Transport</span><div class="rm-sub">Transport</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Source: BEAMS360 module deployment tracker, Malaysia region.</span>
+    <span>Customer Success &amp; Projects, BSS IT</span>
+  </footer>
+</main>
+
+<script>
+const MODULES=[
+  {n:"CRM",g:"Admis\u00ADsions"},
+  {n:"SIS",g:"Academics"},
+  {n:"Student Attendance",s:"Atten\u00ADdance",g:"Academics"},
+  {n:"Gradebook",s:"Grade\u00ADbook",g:"Academics"},
+  {n:"Curriculum & Lesson Plan",s:"Curri\u00ADculum & Lesson Plan",g:"Academics"},
+  {n:"Holiday & Events",g:"Academics"},
+  {n:"Student Support",g:"Academics"},
+  {n:"Fee Invoices",g:"Finance"},
+  {n:"Teacher Competency Framework",s:"Teacher Compe\u00ADtency",g:"People & HR"},
+  {n:"HRM",g:"People & HR"},
+  {n:"Payroll",g:"People & HR"},
+  {n:"Appraisal",s:"Ap\u00ADpraisal",g:"People & HR"},
+  {n:"Reward & Wellbeing",s:"Reward & Well\u00ADbeing",g:"People & HR"}
+];
+const K12=["L","L","L","L","L","L","L","E:Ecole","L","E:BrioHR","E:BrioHR","L","L"];
+const EY =["L","E:Little Lives","E:Little Lives","N","N","N","N","E:Ecole","L","E:BrioHR","E:BrioHR","L","N"];
+const SCHOOLS=[
+  {b:"Beaconhouse Schools",n:"Sri Inai International School",seg:"k12",s:K12},
+  {b:"Beaconhouse Schools",n:"Sri Murni Private National School",seg:"k12",s:K12},
+  {b:"Beaconhouse Schools",n:"Sri Lethia Private National School",seg:"k12",s:K12},
+  {b:"Peiken Mandarin-English Preschool",n:"Puchong",seg:"ey",s:EY},
+  {b:"Peiken Mandarin-English Preschool",n:"Sri Petaling",seg:"ey",s:EY},
+  {b:"Beaconhouse Newlands Early Years",n:"Bangsar",seg:"ey",s:EY},
+  {b:"Beaconhouse Newlands Early Years",n:"Ampang",seg:"ey",s:EY},
+  {b:"Beaconhouse Newlands Early Years",n:"SS2",seg:"ey",s:EY},
+  {b:"Beaconhouse Preschool",n:"Subang Jaya",seg:"ey",s:EY},
+  {b:"Beaconhouse Preschool",n:"Bunga Raya, Klang",seg:"ey",s:EY},
+  {b:"Beaconhouse Preschool",n:"Sarah's, Klang",seg:"ey",s:EY}
+];
+const kind=c=>c[0]==="L"?"l":c[0]==="E"?"e":"n";
+const label=c=>c==="L"?"Live":c==="N"?"Not in use":c.slice(2);
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const $=id=>document.getElementById(id);
+
+/* Static: segment comparison */
+function ring(p,color){
+  const r=50,c=2*Math.PI*r;
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--none)" stroke-width="12"/><circle class="fg" cx="60" cy="60" r="${r}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}"/></svg>`;
+}
+function segCard(title,sub,profile){
+  const live=profile.filter(c=>c==="L").length;
+  const p=pct(live,profile.length);
+  const liveMods=MODULES.filter((m,i)=>profile[i]==="L").map(m=>m.n);
+  return `<div class="seg-row">
+    <div><h3>${title}</h3><p class="sub">${sub}</p></div>
+    <div class="pills">${liveMods.map(m=>`<span class="pill l">${esc(m)}</span>`).join("")}</div>
+  </div>`;
+}
+$("compare").innerHTML=
+  segCard("Beaconhouse schools","Sri Inai International School<br>Sri Murni Private National School<br>Sri Lethia Private National School",K12)+
+  segCard("Early-years campuses","Peiken: Puchong, Sri Petaling<br>Newlands Early Years: Bangsar, Ampang, SS2<br>Beaconhouse Preschool: Subang Jaya, Bunga Raya Klang, Sarah\'s Klang",EY);
+
+/* Static: gaps */
+const eyRows=SCHOOLS.filter(s=>s.seg==="ey");
+$("gaps").innerHTML=MODULES.filter((m,i)=>eyRows.every(r=>r.s[i]==="N")).map(m=>`<span class="chip">${esc(m.n)}</span>`).join("");
+
+let filter="all";
+try{const f=localStorage.getItem("bssmy-filter");if(["all","k12","ey"].includes(f))filter=f;}catch(e){}
+
+function render(){
+  const rows=SCHOOLS.filter(s=>filter==="all"||s.seg===filter);
+
+  /* Matrix */
+  const groups=[];MODULES.forEach(m=>{const g=groups[groups.length-1];g&&g.g===m.g?g.c++:groups.push({g:m.g,c:1});});
+  let h=`<colgroup><col class="c-school">${MODULES.map(()=>"<col>").join("")}</colgroup><thead><tr class="groups"><th class="school-h"></th>${groups.map(g=>`<th colspan="${g.c}">${g.g}</th>`).join("")}</tr>`;
+  h+=`<tr class="mods"><th class="school-h">Campus</th>${MODULES.map(m=>`<th title="${esc(m.n)}">${esc(m.s||m.n)}</th>`).join("")}</tr></thead><tbody>`;
+  let lastB="";
+  rows.forEach(r=>{
+    if(r.b!==lastB){h+=`<tr class="brand"><td colspan="${MODULES.length+1}">${esc(r.b)}</td></tr>`;lastB=r.b;}
+    const live=r.s.filter(c=>c==="L").length;
+    h+=`<tr><td class="school">${esc(r.n)}</td>${r.s.map((c,i)=>`<td><div class="cell ${kind(c)}" title="${esc(r.n)}: ${esc(MODULES[i].n)}, ${esc(label(c))}">${esc(label(c))}</div></td>`).join("")}</tr>`;
+  });
+  $("matrix").innerHTML=h+"</tbody>";
+
+  $("mx-sub").textContent = filter==="all" ? "Every campus and module in the Malaysia tracker." : `Showing ${rows.length} ${filter==="k12"?"schools":"early-years campuses"}.`;
+  /* Other systems */
+  const sys={};
+  rows.forEach(r=>r.s.forEach((c,i)=>{if(kind(c)==="e"){const k=c.slice(2);sys[k]=sys[k]||{m:new Set(),c:new Set()};sys[k].m.add(MODULES[i].n);sys[k].c.add(r.n);}}));
+  $("sys").innerHTML=Object.entries(sys).map(([k,v])=>
+    `<div class="sys-item"><div class="sys-mark" aria-hidden="true">${esc(k[0])}</div><div><b>${esc(k)}</b><span>${[...v.m].map(esc).join(" and ")} at ${v.c.size} campus${v.c.size>1?"es":""}</span></div></div>`).join("");
+
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===filter));
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+  filter=b.dataset.f;try{localStorage.setItem("bssmy-filter",filter);}catch(e){}render();
+}));
+render();
+</script>
+</body>
+</html>
